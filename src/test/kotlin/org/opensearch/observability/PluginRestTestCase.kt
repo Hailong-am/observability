@@ -239,6 +239,17 @@ abstract class PluginRestTestCase : OpenSearchRestTestCase() {
             val jacocoBuildPath = System.getProperty("jacoco.dir") ?: return
             val serverUrl = "service:jmx:rmi:///jndi/rmi://127.0.0.1:7777/jmxrmi"
             JMXConnectorFactory.connect(JMXServiceURL(serverUrl)).use { connector ->
+                // Get the MBeanServerConnection
+                val mbsConnection = connector.mBeanServerConnection
+
+                // Get all ObjectInstances (MBeans) registered with the remote MBeanServer
+                val objectInstances = mbsConnection.queryMBeans(null, null)
+
+                for (objectInstance in objectInstances) {
+                    val objectName = objectInstance.objectName
+                    println("Remote MBean Name: $objectName")
+                    // You can print more information about the MBean if needed
+                }
                 val proxy = MBeanServerInvocationHandler.newProxyInstance(
                     connector.mBeanServerConnection,
                     ObjectName("org.jacoco:type=Runtime"),
